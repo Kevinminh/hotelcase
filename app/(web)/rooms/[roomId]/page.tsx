@@ -5,5 +5,5 @@ type RoomPageProps = {
 export default async function RoomPage({ params }: RoomPageProps) {
 	const { roomId } = await params
 
-	return <div>RoomPage</div>
+	return <div>{roomId}</div>
 }

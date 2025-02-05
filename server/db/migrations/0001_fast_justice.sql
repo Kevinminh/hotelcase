@@ -1,0 +1,1 @@
+ALTER TABLE "rooms" DROP CONSTRAINT "rooms_category_unique";

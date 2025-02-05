@@ -1,45 +1,39 @@
 import { relations } from "drizzle-orm"
-import { pgTable, primaryKey, text } from "drizzle-orm/pg-core"
-
+import { pgTable, text } from "drizzle-orm/pg-core"
 import { RoleTypesType } from "@/types/types"
 
-// Define all possible permissions
+import { users } from "./user"
 export const permissions = pgTable("permissions", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	name: text("name").notNull().unique(), // e.g., "create:comments"
+	name: text("name").notNull().unique(),
 	description: text("description"),
 })
 
-// Define roles
 export const roles = pgTable("roles", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	name: text("name").notNull().unique().$type<RoleTypesType>().default("user"), // e.g., "admin"
+	name: text("name").notNull().unique().$type<RoleTypesType>().default("user"),
 	description: text("description"),
 })
 
-// Link roles to permissions (many-to-many)
-export const rolePermissions = pgTable(
-	"role_permissions",
-	{
-		roleId: text("role_id")
-			.notNull()
-			.references(() => roles.id, { onDelete: "cascade" }),
-		permissionId: text("permission_id")
-			.notNull()
-			.references(() => permissions.id, { onDelete: "cascade" }),
-	},
-	(t) => ({
-		pk: primaryKey({ columns: [t.roleId, t.permissionId] }),
-	})
-)
+export const rolePermissions = pgTable("role_permissions", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	roleId: text("role_id")
+		.notNull()
+		.references(() => roles.id, { onDelete: "cascade" }),
+	permissionId: text("permission_id")
+		.notNull()
+		.references(() => permissions.id, { onDelete: "cascade" }),
+})
 
-// Relations
 export const rolesRelations = relations(roles, ({ many }) => ({
 	permissions: many(rolePermissions),
+	users: many(users),
 }))
 
 export const permissionsRelations = relations(permissions, ({ many }) => ({

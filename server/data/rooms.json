@@ -1,0 +1,56 @@
+[
+	{
+		"id": "1",
+		"number": "101",
+		"category": "single_bed",
+		"image": "https://res.cloudinary.com/dzdbsfkka/image/upload/v1738764236/superior-double-whole-room-clarion-hotel-oslo_mfylqt.webp",
+		"price": 100,
+		"createdAt": "2021-01-01T00:00:00.000Z",
+		"updatedAt": "2021-01-01T00:00:00.000Z"
+	},
+	{
+		"id": "2",
+		"number": "102",
+		"category": "double_bed",
+		"image": "https://res.cloudinary.com/dzdbsfkka/image/upload/v1738764236/suite-hotels_avgusb.jpg",
+		"price": 200,
+		"createdAt": "2021-01-01T00:00:00.000Z",
+		"updatedAt": "2021-01-01T00:00:00.000Z"
+	},
+	{
+		"id": "3",
+		"number": "103",
+		"category": "single_bed",
+		"image": "https://res.cloudinary.com/dzdbsfkka/image/upload/v1738764236/modern-luxury-bedroom-suite-and-bathroom-with-working-table-scaled_c4mmn5.jpg",
+		"price": 100,
+		"createdAt": "2021-01-01T00:00:00.000Z",
+		"updatedAt": "2021-01-01T00:00:00.000Z"
+	},
+	{
+		"id": "4",
+		"number": "104",
+		"category": "double_bed",
+		"image": "https://res.cloudinary.com/dzdbsfkka/image/upload/v1738764236/TAL-deluxe-room-villa-inkognito-sommerro-oslo-VILLAINKOGNITO0423-226d99d242bc4f8bbd522be11870c508_jgurdo.jpg",
+		"price": 200,
+		"createdAt": "2021-01-01T00:00:00.000Z",
+		"updatedAt": "2021-01-01T00:00:00.000Z"
+	},
+	{
+		"id": "5",
+		"number": "105",
+		"category": "double_bed",
+		"image": "https://res.cloudinary.com/dzdbsfkka/image/upload/v1738764236/0x0_p3wsm4.webp",
+		"price": 599,
+		"createdAt": "2021-01-01T00:00:00.000Z",
+		"updatedAt": "2021-01-01T00:00:00.000Z"
+	},
+	{
+		"id": "6",
+		"number": "106",
+		"category": "double_bed",
+		"image": "https://res.cloudinary.com/dzdbsfkka/image/upload/v1738764238/Sofitel-Dubai-Wafi-Luxury-Room-Bedroom-Skyline-View-Image1_WEB_met10s.jpg",
+		"price": 599,
+		"createdAt": "2021-01-01T00:00:00.000Z",
+		"updatedAt": "2021-01-01T00:00:00.000Z"
+	}
+]

@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
-import { initializeRBAC } from "./seeding/roles"
+
+import { assignRoles } from "./seeding/assign-roles"
 
 async function seed() {
 	try {
 		console.log("🌱 Starting database seed...")
-		console.log("📊 Initializing RBAC...")
-		await initializeRBAC()
+		console.log("📊 Assigning roles...")
+		await assignRoles()
 		console.log("✅ Database seeded successfully")
 		process.exit(0)
 	} catch (error) {

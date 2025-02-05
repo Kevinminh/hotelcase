@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { buttonVariants } from "./ui/button"
-import { getCurrentUser } from "@/server/actions/auth"
+
+import { UserButton } from "./user-button"
 
 export default async function Navbar() {
-	const { user } = await getCurrentUser()
-
 	return (
 		<header className="w-full py-4">
 			<div className="max-w-7xl mx-auto flex items-center justify-between px-4">
@@ -26,9 +25,7 @@ export default async function Navbar() {
 							</Link>
 						</li>
 						<li>
-							<Link href={user ? "/bookings" : "/sign-in"} className={cn(buttonVariants({ variant: "link" }))}>
-								<span>{user ? "My bookings" : "Sign in"}</span>
-							</Link>
+							<UserButton />
 						</li>
 					</ul>
 				</nav>

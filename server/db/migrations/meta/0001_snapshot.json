@@ -1,6 +1,6 @@
 {
-  "id": "13dab6be-02c8-4e2d-bd70-414a2508ecc3",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "3534ce9f-32dd-4a5e-973f-ad61c3d53b46",
+  "prevId": "13dab6be-02c8-4e2d-bd70-414a2508ecc3",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -843,15 +843,7 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "rooms_category_unique": {
-          "name": "rooms_category_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "category"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     }
   },
   "enums": {

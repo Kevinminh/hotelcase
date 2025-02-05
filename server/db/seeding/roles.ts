@@ -39,12 +39,12 @@ export const defaultPermissions: DefaultPermissionsType[] = [
 export const defaultRoles: DefaultRolesType[] = [
 	{
 		name: "owner",
-		description: "Workspace owner",
+		description: "Hotel owner",
 		permissions: ["*"],
 	},
 	{
 		name: "manager",
-		description: "Workspace manager",
+		description: "Hotel manager",
 		permissions: ["view:members", "create:members", "update:members", "delete:members"],
 	},
 	{
@@ -54,7 +54,6 @@ export const defaultRoles: DefaultRolesType[] = [
 	},
 ]
 
-// For seed.ts to create initial data
 export async function initializeRBAC() {
 	try {
 		// Insert permissions one by one to handle conflicts
