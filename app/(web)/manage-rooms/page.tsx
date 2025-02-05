@@ -39,6 +39,8 @@ export default async function ManageRoomsPage() {
 			<div>
 				Total bookings: <span className="font-bold">{allBookings.length}</span>
 			</div>
+
+			<div>This is where we can manage rooms, bookings and customers. TODO</div>
 		</PageWrapper>
 	)
 }

@@ -12,7 +12,7 @@
 - OK Hotelroom can be reserved for a specific period
 - OK A room should not be able to be booked twice
 - OK Auditlog / history must be available per room / per customer
-- Personal customer information must be stored securely
+- OK Personal customer information must be stored securely
 - The system should be able to integrate with other solutions
 
 ## LOCAL START SEED
