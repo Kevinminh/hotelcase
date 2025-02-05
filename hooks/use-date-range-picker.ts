@@ -1,7 +1,6 @@
 "use client"
 
 import { createParser, useQueryStates } from "nuqs"
-import { addDays } from "date-fns"
 import type { DateRange as DayPickerDateRange } from "react-day-picker"
 
 type DateRange = {
@@ -9,19 +8,16 @@ type DateRange = {
 	to: Date
 }
 
-const getDefaultRange = (): DateRange => {
-	const today = new Date()
-	return {
-		from: today,
-		to: addDays(today, 1),
-	}
+const EMPTY_RANGE = {
+	from: new Date(),
+	to: new Date(),
 }
 
 const parseDateRange = createParser<DateRange>({
 	parse: (value: string | null): DateRange => {
-		if (!value) return getDefaultRange()
+		if (!value) return EMPTY_RANGE
 		const [from, to] = value.split("|")
-		if (!from || !to) return getDefaultRange()
+		if (!from || !to) return EMPTY_RANGE
 		return {
 			from: new Date(from),
 			to: new Date(to),
@@ -31,7 +27,7 @@ const parseDateRange = createParser<DateRange>({
 		if (!value?.from || !value?.to) return ""
 		return `${value.from.toISOString()}|${value.to.toISOString()}`
 	},
-}).withDefault(getDefaultRange())
+}).withDefault(EMPTY_RANGE)
 
 interface UseDateRangePickerReturn {
 	range: DateRange
@@ -51,7 +47,7 @@ export function useDateRangePicker(): UseDateRangePickerReturn {
 	return {
 		range: dateRange,
 		setRange: (newRange: DayPickerDateRange | undefined) => {
-			if (newRange?.from && newRange.to) {
+			if (newRange?.from && newRange?.to) {
 				setDateRange({ dateRange: { from: newRange.from, to: newRange.to } })
 			}
 		},

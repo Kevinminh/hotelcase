@@ -2,7 +2,6 @@
 import { RoomType } from "@/server/db/schemas/types"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
 import { Separator } from "../ui/separator"
-import { DateRangePicker } from "../global/date-range-picker"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
@@ -11,7 +10,14 @@ import { Button } from "../ui/button"
 import { useDateRangePicker } from "@/hooks/use-date-range-picker"
 import { useEffect } from "react"
 import { useMutation } from "@tanstack/react-query"
+import React from "react"
 import { toast } from "sonner"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
+import { addDays, format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type RoomBookingFormProps = {
 	room: Pick<
@@ -29,38 +35,60 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 		defaultValues: {
 			roomId: room.id,
 			customerId: userId,
-			startDate: range.from,
-			endDate: range.to,
+			startDate: new Date(),
+			endDate: addDays(new Date(), 1),
 		},
 	})
 
 	// Keep form in sync with URL state
 	useEffect(() => {
-		form.setValue("startDate", range.from)
-		form.setValue("endDate", range.to)
-	}, [form, range])
+		// Only update form if we have a complete range
+		if (range.from.getTime() !== range.to.getTime()) {
+			form.setValue("startDate", range.from, { shouldValidate: true })
+			form.setValue("endDate", range.to, { shouldValidate: true })
+		}
+	}, [form, range.from, range.to])
 
 	const { mutate: handleBook, isPending } = useMutation({
-		mutationFn: (data: CreateBookingSchemaType) => {
-			return fetch(`/api/room/${data.roomId}/book`, {
+		mutationFn: async (data: CreateBookingSchemaType) => {
+			const response = await fetch(`/api/room/${data.roomId}/book`, {
 				method: "POST",
 				body: JSON.stringify(data),
 			})
+
+			if (!response.ok) {
+				const error = await response.json()
+				throw new Error(error.error)
+			}
+
+			return response.json()
 		},
 		onSuccess: () => {
 			toast.success("Room booked successfully")
+			form.reset({
+				roomId: room.id,
+				customerId: userId,
+				startDate: new Date(),
+				endDate: addDays(new Date(), 1),
+			})
 		},
-		onError: () => {
-			toast.error("Failed to book room")
+		onError: (error: Error) => {
+			toast.error(error.message || "Failed to book room")
 		},
 	})
 
-	const onSubmit = (data: CreateBookingSchemaType) => {
-		handleBook(data)
-	}
+	const onSubmit = React.useCallback(
+		(data: CreateBookingSchemaType) => {
+			handleBook(data)
+		},
+		[handleBook]
+	)
 
-	const totalPrice =
-		Number(room.price) * Math.max(Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)), 1)
+	const totalPrice = React.useMemo(
+		() =>
+			Number(room.price) * Math.max(Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)), 1),
+		[room.price, range.to, range.from]
+	)
 
 	return (
 		<Form {...form}>
@@ -75,13 +103,66 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 						<FormField
 							control={form.control}
 							name="startDate"
-							render={() => (
-								<FormItem className="flex flex-col w-full">
-									<FormControl>
-										<DateRangePicker className="w-full" value={range} onChange={setRange} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
+							render={({ field: startDateField }) => (
+								<FormField
+									control={form.control}
+									name="endDate"
+									render={({ field: endDateField }) => (
+										<FormItem className="flex flex-col w-full">
+											<Popover>
+												<PopoverTrigger asChild>
+													<FormControl>
+														<Button
+															id="date"
+															variant={"outline"}
+															className={cn(
+																"w-full justify-start text-left font-normal",
+																!startDateField.value && "text-muted-foreground"
+															)}
+														>
+															<CalendarIcon className="mr-2 h-4 w-4" />
+															{startDateField.value ? (
+																endDateField.value ? (
+																	<>
+																		{format(startDateField.value, "LLL dd, y")} -{" "}
+																		{format(endDateField.value, "LLL dd, y")}
+																	</>
+																) : (
+																	format(startDateField.value, "LLL dd, y")
+																)
+															) : (
+																<span>Pick a date range</span>
+															)}
+														</Button>
+													</FormControl>
+												</PopoverTrigger>
+												<PopoverContent className="w-auto p-0" align="start">
+													<Calendar
+														initialFocus
+														mode="range"
+														defaultMonth={startDateField.value}
+														selected={{
+															from: startDateField.value,
+															to: endDateField.value,
+														}}
+														onSelect={(newDate) => {
+															if (newDate?.from) {
+																startDateField.onChange(newDate.from)
+																setRange(newDate)
+															}
+															if (newDate?.to) {
+																endDateField.onChange(newDate.to)
+															}
+														}}
+														numberOfMonths={2}
+														disabled={(date) => date < new Date()}
+													/>
+												</PopoverContent>
+											</Popover>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							)}
 						/>
 						<Button type="submit" className="w-full" disabled={isPending || form.formState.isSubmitting}>
