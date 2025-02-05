@@ -1,9 +1,9 @@
 import { RoomType } from "@/server/db/schemas/types"
 import Image from "next/image"
 import { Skeleton } from "../ui/skeleton"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card"
+import { Card, CardContent, CardFooter } from "../ui/card"
 import { buttonVariants } from "../ui/button"
-import { cn, getRoomCategoryName } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 type RoomGridItemProps = {
@@ -13,19 +13,19 @@ type RoomGridItemProps = {
 export function RoomGridItem({ room }: RoomGridItemProps) {
 	return (
 		<Card className="justify-between flex flex-col">
-			<CardHeader>
-				<CardTitle>Room {room.number}</CardTitle>
-				<CardDescription>{getRoomCategoryName(room.category)}</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Image src={room.image} alt={room.number} width={500} height={500} className="rounded-md" />
+			<CardContent className="pt-5 space-y-4">
+				<Image src={room.image} alt={room.number} width={500} height={500} className="rounded-md h-56 object-cover" />
+				<div className="grid">
+					<h5 className="font-semibold">Room {room.number}</h5>
+					<span className="text-muted-foreground text-sm">{room.description}</span>
+				</div>
 			</CardContent>
 			<CardFooter className="justify-between">
-				<div className="text-sm font-semibold">
-					{room.price}$ <span className="text-muted-foreground font-normal">per night</span>
+				<div className="font-semibold">
+					$ {room.price} <span className="text-muted-foreground font-normal text-sm">per night</span>
 				</div>
 
-				<Link className={cn(buttonVariants({ variant: "default" }))} href={`/rooms/${room.id}`}>
+				<Link className={cn(buttonVariants({ variant: "default" }))} href={`/rooms/${room.id}`} target="_blank">
 					Book Now
 				</Link>
 			</CardFooter>

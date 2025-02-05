@@ -4,7 +4,7 @@ import { buttonVariants } from "@/components/ui/button"
 
 import { UserButton } from "@/components/global/user-button"
 
-export default async function Navbar() {
+export default function Navbar() {
 	return (
 		<header className="w-full py-4">
 			<div className="max-w-7xl mx-auto flex items-center justify-between px-4">

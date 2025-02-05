@@ -11,7 +11,7 @@ export function RoomDetails({ room }: RoomDetailsProps) {
 	return (
 		<div>
 			<RoomGallery room={room} />
-			<div className="grid grid-cols-1 md:grid-cols-[55%_1fr] gap-x-10 py-8">
+			<div className="grid grid-cols-1 md:grid-cols-[55%_1fr] gap-x-28 py-8">
 				<RoomInfo room={room} />
 				<RoomBookingForm room={room} />
 			</div>

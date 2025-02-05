@@ -7,6 +7,7 @@ import { db } from "@/server/db/config"
 import { eq } from "drizzle-orm"
 import { users } from "@/server/db/schemas"
 import { ActionTooltip } from "./action-tooltip"
+import { SignOutButton } from "./sign-out-button"
 
 export async function UserButton() {
 	const { user } = await getCurrentUser()
@@ -37,9 +38,7 @@ export async function UserButton() {
 					<UserAvatar user={user} />
 				</Link>
 			</ActionTooltip>
-			<Link href="/sign-out" className={cn(buttonVariants({ variant: "link" }))}>
-				<span>Sign out</span>
-			</Link>
+			<SignOutButton />
 		</>
 	)
 }
