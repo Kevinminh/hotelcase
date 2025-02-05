@@ -7,8 +7,8 @@ export const bookings = pgTable("bookings", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	roomId: text("room_id").references(() => rooms.id),
-	customerId: text("customer_id").references(() => users.id),
+	roomId: text("room_id").references(() => rooms.id, { onDelete: "cascade" }),
+	customerId: text("customer_id").references(() => users.id, { onDelete: "cascade" }),
 	startDate: timestamp("start_date").notNull(),
 	endDate: timestamp("end_date").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -31,7 +31,7 @@ export const bookingAuditLogs = pgTable("booking_audit_logs", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	bookingId: text("booking_id").references(() => bookings.id),
+	bookingId: text("booking_id").references(() => bookings.id, { onDelete: "cascade" }),
 	action: text("action").notNull(),
 
 	description: text("description"),

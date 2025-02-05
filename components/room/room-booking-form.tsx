@@ -77,7 +77,9 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 			return response.json()
 		},
 		onSuccess: () => {
-			toast.success("Room booked successfully")
+			toast.success("Room booked successfully", {
+				description: "Confirmation email sent to your email address",
+			})
 			const initialStartDate = new Date()
 			const initialEndDate = addDays(initialStartDate, 1)
 			form.reset({

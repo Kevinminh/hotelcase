@@ -23,10 +23,10 @@ export const roomAuditLogs = pgTable("room_audit_logs", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	roomId: text("room_id").references(() => rooms.id),
+	roomId: text("room_id").references(() => rooms.id, { onDelete: "cascade" }),
 	action: text("action").notNull(),
 	description: text("description"),
-	userId: text("user_id").references(() => users.id),
+	userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
 	price: numeric("price").notNull(),

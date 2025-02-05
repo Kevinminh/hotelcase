@@ -17,6 +17,10 @@
 
 ## LOCAL START SEED
 
-- db:seed
+- db:seed-roles
 - db:assign-roles
 - db:seed-rooms
+
+TO DELETE DB:
+
+- db:db-delete

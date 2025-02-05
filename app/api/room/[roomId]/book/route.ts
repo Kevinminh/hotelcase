@@ -10,6 +10,10 @@ import { RATE_LIMIT_10 } from "@/lib/constants"
 import { RATE_LIMIT_1_MINUTE } from "@/lib/constants"
 import { getCurrentUser } from "@/server/actions/auth"
 import { format } from "date-fns"
+import { hasPermission } from "@/server/actions/permission"
+import { PERMISSIONS } from "@/server/db/seeding/roles"
+import { resend } from "@/lib/resend"
+import { ReceiptMail } from "@/components/bookings/receipt-mail"
 
 type RouteProps = {
 	params: Promise<{ roomId: string }>
@@ -60,6 +64,19 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 			return new NextResponse(JSON.stringify({ error: "Cant book for others" }), { status: 401 })
 		}
 
+		// 4. Check if user has permission to book
+		const userHasPermission = await hasPermission(PERMISSIONS.BOOK_HOTEL)
+
+		if (!userHasPermission) {
+			await dbClient.insert(roomAuditLogs).values({
+				roomId: roomId,
+				action: "Failed to book",
+				description: `User ${user.email} does not have permission to book`,
+				price: price.toString(),
+			})
+			return new NextResponse(JSON.stringify({ error: "You do not have permission to book" }), { status: 401 })
+		}
+
 		// 4. Rate limit
 		const identifier = `ratelimit:create-booking:${user.id}`
 		const { success } = await ratelimit.limit(identifier)
@@ -98,13 +115,18 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 		// Transaction
 		await dbClient.transaction(async (tx) => {
 			// 7. Create booking
-			await tx.insert(bookings).values({
-				roomId: room.id,
-				customerId: user.id,
-				startDate,
-				endDate,
-				price: price.toString(),
-			})
+			const newBooking = await tx
+				.insert(bookings)
+				.values({
+					roomId: room.id,
+					customerId: user.id,
+					startDate,
+					endDate,
+					price: price.toString(),
+				})
+				.returning({
+					id: bookings.id,
+				})
 
 			// 8. Create audit log
 			await tx.insert(roomAuditLogs).values({
@@ -125,6 +147,25 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					new Date(endDate),
 					"yyyy-MM-dd"
 				)}`,
+			})
+			// 10. Send email
+			await resend.emails.send({
+				from: process.env.RESEND_EMAIL as string,
+				to: user.email,
+				subject: `Booking Confirmation | HotelCase`,
+				react: ReceiptMail({
+					email: user.email,
+					purchaseId: newBooking[0].id,
+					licenseUrl: `https://hotelcase.vercel.app/bookings/${newBooking[0].id}`,
+					amount: price,
+					productName: room.number,
+					desc: `HotelCase: ${room.number}`,
+					// Handle cases where paymentMethod might be null for free products
+					brand: "Free",
+					last4: "N/A",
+					paymentType: "Free",
+					purchaseDate: new Date(),
+				}),
 			})
 		})
 

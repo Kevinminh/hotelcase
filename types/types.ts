@@ -18,3 +18,16 @@ export type RoomCategoryType = (typeof RoomCategory)[keyof typeof RoomCategory]
 export type BookingWithRoomType = BookingType & {
 	room: RoomType | null
 }
+
+export type sendReceiptType = {
+	email: string
+	purchaseId: string
+	amount: number
+	productName: string
+	desc: string
+	purchaseDate: Date
+	last4: string
+	brand: string
+	paymentType: string
+	licenseUrl: string
+}

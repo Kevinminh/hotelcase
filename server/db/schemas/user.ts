@@ -14,7 +14,7 @@ export const users = pgTable("user", {
 	emailVerified: timestamp("emailVerified").defaultNow(),
 	image: text("image"),
 
-	roleId: text("role_id").references(() => roles.id, { onDelete: "set null" }),
+	roleId: text("role_id").references(() => roles.id, { onDelete: "cascade" }),
 
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
@@ -31,7 +31,7 @@ export const userAuditLogs = pgTable("user_audit_logs", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	userId: text("user_id").references(() => users.id),
+	userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
 	action: text("action").notNull(),
 	description: text("description"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
