@@ -7,27 +7,28 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { createBookingSchema, CreateBookingSchemaType } from "@/lib/schema"
-import { useSession } from "next-auth/react"
 import { Button } from "../ui/button"
 import { useDateRangePicker } from "@/hooks/use-date-range-picker"
 import { useEffect } from "react"
+import { useMutation } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 type RoomBookingFormProps = {
 	room: Pick<
 		RoomType,
 		"id" | "price" | "number" | "category" | "guestCapacity" | "bedCount" | "bathroomCount" | "description"
 	>
+	userId: string | null
 }
 
-export function RoomBookingForm({ room }: RoomBookingFormProps) {
-	const { data: session } = useSession()
+export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 	const { range, setRange } = useDateRangePicker()
 
 	const form = useForm<CreateBookingSchemaType>({
 		resolver: zodResolver(createBookingSchema),
 		defaultValues: {
 			roomId: room.id,
-			customerId: session?.user?.id,
+			customerId: userId,
 			startDate: range.from,
 			endDate: range.to,
 		},
@@ -39,8 +40,23 @@ export function RoomBookingForm({ room }: RoomBookingFormProps) {
 		form.setValue("endDate", range.to)
 	}, [form, range])
 
+	const { mutate: handleBook, isPending } = useMutation({
+		mutationFn: (data: CreateBookingSchemaType) => {
+			return fetch(`/api/room/${data.roomId}/book`, {
+				method: "POST",
+				body: JSON.stringify(data),
+			})
+		},
+		onSuccess: () => {
+			toast.success("Room booked successfully")
+		},
+		onError: () => {
+			toast.error("Failed to book room")
+		},
+	})
+
 	const onSubmit = (data: CreateBookingSchemaType) => {
-		console.log(data)
+		handleBook(data)
 	}
 
 	const totalPrice =
@@ -68,7 +84,7 @@ export function RoomBookingForm({ room }: RoomBookingFormProps) {
 								</FormItem>
 							)}
 						/>
-						<Button type="submit" className="w-full">
+						<Button type="submit" className="w-full" disabled={isPending || form.formState.isSubmitting}>
 							Book now
 						</Button>
 						<Separator />

@@ -5,15 +5,16 @@ import { RoomInfo } from "./room-info"
 
 type RoomDetailsProps = {
 	room: RoomType
+	userId: string | null
 }
 
-export function RoomDetails({ room }: RoomDetailsProps) {
+export function RoomDetails({ room, userId }: RoomDetailsProps) {
 	return (
 		<div>
 			<RoomGallery room={room} />
 			<div className="grid grid-cols-1 md:grid-cols-[55%_1fr] gap-x-28 py-8">
 				<RoomInfo room={room} />
-				<RoomBookingForm room={room} />
+				<RoomBookingForm room={room} userId={userId} />
 			</div>
 		</div>
 	)

@@ -1,4 +1,5 @@
 import { RoomDetails } from "@/components/room/room-details"
+import { getCurrentUser } from "@/server/actions/auth"
 import { db } from "@/server/db/config"
 import { rooms } from "@/server/db/schemas"
 import { eq } from "drizzle-orm"
@@ -10,6 +11,8 @@ type RoomPageProps = {
 export default async function RoomPage({ params }: RoomPageProps) {
 	const { roomId } = await params
 
+	const { user } = await getCurrentUser()
+
 	const [room] = await db.select().from(rooms).where(eq(rooms.id, roomId)).limit(1)
 
 	if (!room) {
@@ -19,7 +22,7 @@ export default async function RoomPage({ params }: RoomPageProps) {
 	return (
 		<main className="size-full flex-1 py-10">
 			<div className="max-w-7xl mx-auto px-4">
-				<RoomDetails room={room} />
+				<RoomDetails room={room} userId={user?.id ?? null} />
 			</div>
 		</main>
 	)
