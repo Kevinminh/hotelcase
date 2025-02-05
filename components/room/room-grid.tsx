@@ -16,7 +16,7 @@ export async function RoomGrid() {
 export async function RoomGridSkeleton() {
 	return (
 		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{Array.from({ length: 9 }).map((_, index) => (
+			{Array.from({ length: 8 }).map((_, index) => (
 				<RoomGridItemSkeleton key={index} />
 			))}
 		</div>

@@ -36,7 +36,7 @@ export function RoomGridItem({ room }: RoomGridItemProps) {
 export function RoomGridItemSkeleton() {
 	return (
 		<Card>
-			<Skeleton className="h-[200px] w-full" />
+			<Skeleton className="h-72 w-full" />
 		</Card>
 	)
 }
