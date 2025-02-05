@@ -36,6 +36,9 @@ export default async function ManageRoomsPage() {
 			<div className="text-3xl text-green-500 mt-2">
 				Total revenue: <span className="font-bold">$ {totalRevenue}</span>
 			</div>
+			<div>
+				Total bookings: <span className="font-bold">{allBookings.length}</span>
+			</div>
 		</PageWrapper>
 	)
 }
