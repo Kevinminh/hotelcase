@@ -1,8 +1,9 @@
+import { PageWrapper } from "@/components/global/page-wrapper"
 import { RoomDetails } from "@/components/room/room-details"
 import { getCurrentUser } from "@/server/actions/auth"
 import { db } from "@/server/db/config"
-import { rooms } from "@/server/db/schemas"
-import { eq } from "drizzle-orm"
+import { roomAuditLogs, rooms } from "@/server/db/schemas"
+import { desc, eq } from "drizzle-orm"
 
 type RoomPageProps = {
 	params: Promise<{ roomId: string }>
@@ -19,11 +20,15 @@ export default async function RoomPage({ params }: RoomPageProps) {
 		return <div className="h-screen flex items-center justify-center text-2xl font-bold">Room not found</div>
 	}
 
+	const dbRoomAuditLogs = await db
+		.select()
+		.from(roomAuditLogs)
+		.where(eq(roomAuditLogs.roomId, roomId))
+		.orderBy(desc(roomAuditLogs.createdAt))
+
 	return (
-		<main className="size-full flex-1 py-10">
-			<div className="max-w-7xl mx-auto px-4">
-				<RoomDetails room={room} userId={user?.id ?? null} />
-			</div>
-		</main>
+		<PageWrapper>
+			<RoomDetails room={room} userId={user?.id ?? null} roomAuditLogs={dbRoomAuditLogs} />
+		</PageWrapper>
 	)
 }

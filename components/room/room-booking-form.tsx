@@ -19,7 +19,7 @@ import { addDays, format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signIn } from "next-auth/react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 type RoomBookingFormProps = {
 	room: Pick<
@@ -31,6 +31,7 @@ type RoomBookingFormProps = {
 
 export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 	const pathName = usePathname()
+	const router = useRouter()
 	const { range, setRange } = useDateRangePicker()
 
 	const currentPathWithParams = `${pathName}?dateRange=${range.from.toISOString()}|${range.to.toISOString()}`
@@ -42,6 +43,7 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 			customerId: userId,
 			startDate: new Date(),
 			endDate: addDays(new Date(), 1),
+			price: Number(room.price),
 		},
 	})
 
@@ -51,8 +53,14 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 		if (range.from.getTime() !== range.to.getTime()) {
 			form.setValue("startDate", range.from, { shouldValidate: true })
 			form.setValue("endDate", range.to, { shouldValidate: true })
+
+			// Calculate and update total price
+			const numberOfNights = Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) + 1
+			const roomTotal = numberOfNights * Number(room.price)
+			const totalPrice = roomTotal + 70 // Add cleaning fee
+			form.setValue("price", totalPrice, { shouldValidate: true })
 		}
-	}, [form, range.from, range.to])
+	}, [form, range.from, range.to, room.price])
 
 	const { mutate: handleBook, isPending } = useMutation({
 		mutationFn: async (data: CreateBookingSchemaType) => {
@@ -70,15 +78,21 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 		},
 		onSuccess: () => {
 			toast.success("Room booked successfully")
+			const initialStartDate = new Date()
+			const initialEndDate = addDays(initialStartDate, 1)
 			form.reset({
 				roomId: room.id,
 				customerId: userId,
-				startDate: new Date(),
-				endDate: addDays(new Date(), 1),
+				startDate: initialStartDate,
+				endDate: initialEndDate,
+				price: Number(room.price) * 2 + 70, // 2 days + cleaning fee
 			})
+
+			router.refresh()
 		},
 		onError: (error: Error) => {
 			toast.error(error.message || "Failed to book room")
+			router.refresh()
 		},
 	})
 
@@ -95,12 +109,6 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 			redirectTo: currentPathWithParams,
 		})
 	}
-
-	const totalPrice = React.useMemo(
-		() =>
-			Number(room.price) * Math.max(Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)), 1),
-		[room.price, range.to, range.from]
-	)
 
 	return (
 		<Form {...form}>
@@ -186,12 +194,35 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 								Book now
 							</Button>
 						)}
+
+						<div className="flex items-center justify-between w-full">
+							<span>
+								{Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} nights × $
+								{Number(room.price)}
+							</span>
+							<span>
+								$
+								{(Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) + 1) *
+									Number(room.price)}
+							</span>
+						</div>
+
+						<div className="flex items-center justify-between w-full">
+							<span>Cleaning fee</span>
+							<span>$ 70</span>
+						</div>
+
 						<Separator />
 					</CardContent>
 
-					<CardFooter className="flex justify-between font-medium">
+					<CardFooter className="flex justify-between font-medium px-10">
 						<span>Total sum</span>
-						<div>$ {totalPrice.toFixed(2)}</div>
+						<div>
+							${" "}
+							{(Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) + 1) *
+								Number(room.price) +
+								70}
+						</div>
 					</CardFooter>
 				</Card>
 			</form>

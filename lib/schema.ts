@@ -5,6 +5,14 @@ export const createBookingSchema = z.object({
 	customerId: z.string().nullable(),
 	startDate: z.date(),
 	endDate: z.date(),
+	price: z.number(),
 })
 
 export type CreateBookingSchemaType = z.infer<typeof createBookingSchema>
+
+export const cancelBookingSchema = z.object({
+	bookingId: z.string(),
+	customerId: z.string(),
+})
+
+export type CancelBookingSchemaType = z.infer<typeof cancelBookingSchema>

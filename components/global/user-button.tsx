@@ -32,7 +32,7 @@ export async function UserButton() {
 			<Link href="/manage-rooms" className={cn(buttonVariants({ variant: "link" }))}>
 				<span>Manage rooms</span>
 			</Link>
-			<ActionTooltip label={`Role: ${userRole?.role?.name}`}>
+			<ActionTooltip label={`Role: ${userRole?.role?.name ?? "user"}`}>
 				<Link href="/bookings" className={cn(buttonVariants({ variant: "link", className: "gap-x-4" }))}>
 					<span>Bookings</span>
 					<UserAvatar user={user} />

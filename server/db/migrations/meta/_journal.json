@@ -29,6 +29,13 @@
       "when": 1738766882923,
       "tag": "0003_true_mister_fear",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1738787058921,
+      "tag": "0004_lucky_chameleon",
+      "breakpoints": true
     }
   ]
 }

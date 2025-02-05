@@ -8,9 +8,15 @@
 
 ## MUST HAVE
 
-- Managers and customers must be able to book room in category (singlebed, doublebed) or a specific room.
-- Hotelroom can be reserved for a specific period
-- A room should not be able to be booked twice
-- Auditlog / history must be available per room / per customer
+- OK Managers and customers must be able to book room in category (singlebed, doublebed) or a specific room.
+- OK Hotelroom can be reserved for a specific period
+- OK A room should not be able to be booked twice
+- OK Auditlog / history must be available per room / per customer
 - Personal customer information must be stored securely
 - The system should be able to integrate with other solutions
+
+## LOCAL START SEED
+
+- db:seed
+- db:assign-roles
+- db:seed-rooms

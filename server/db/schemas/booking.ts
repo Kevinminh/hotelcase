@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, numeric } from "drizzle-orm/pg-core"
 import { rooms } from "./room"
 import { users } from "./user"
 
@@ -12,6 +12,7 @@ export const bookings = pgTable("bookings", {
 	startDate: timestamp("start_date").notNull(),
 	endDate: timestamp("end_date").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
+	price: numeric("price").notNull(),
 	updatedAt: timestamp("updated_at").defaultNow(),
 })
 

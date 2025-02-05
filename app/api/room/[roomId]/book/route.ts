@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db, dbClient } from "@/server/db/config"
 import { and, eq, lte, gte } from "drizzle-orm"
-import { bookings, roomAuditLogs, rooms } from "@/server/db/schemas"
+import { bookings, roomAuditLogs, rooms, userAuditLogs } from "@/server/db/schemas"
 import { NextRequest, NextResponse } from "next/server"
-import { createBookingSchema } from "@/lib/schema"
+import { cancelBookingSchema, createBookingSchema } from "@/lib/schema"
 import { Ratelimit } from "@upstash/ratelimit"
 import { redis } from "@/lib/upstash"
 import { RATE_LIMIT_10 } from "@/lib/constants"
 import { RATE_LIMIT_1_MINUTE } from "@/lib/constants"
 import { getCurrentUser } from "@/server/actions/auth"
+import { format } from "date-fns"
 
 type RouteProps = {
 	params: Promise<{ roomId: string }>
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 			return new NextResponse(JSON.stringify({ error: validateBody.error.message }), { status: 400 })
 		}
 
-		const { customerId, startDate, endDate } = validateBody.data
+		const { customerId, startDate, endDate, price } = validateBody.data
 
 		// 2. Get user session
 		const { user } = await getCurrentUser()
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 		}
 
 		// 4. Rate limit
-		const identifier = `ratelimit:create-item:${user.id}`
+		const identifier = `ratelimit:create-booking:${user.id}`
 		const { success } = await ratelimit.limit(identifier)
 
 		if (!success) {
@@ -83,6 +84,12 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 			.where(and(eq(bookings.roomId, room.id), lte(bookings.startDate, endDate), gte(bookings.endDate, startDate)))
 
 		if (existingBooking) {
+			await dbClient.insert(roomAuditLogs).values({
+				roomId: room.id,
+				action: "Failed to book",
+				description: `Room ${room.number} is not available for the selected dates: ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(new Date(endDate), "yyyy-MM-dd")}`,
+				price: price.toString(),
+			})
 			return new NextResponse(JSON.stringify({ error: "Room is not available for the selected dates" }), {
 				status: 400,
 			})
@@ -96,13 +103,28 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 				customerId: user.id,
 				startDate,
 				endDate,
+				price: price.toString(),
 			})
 
 			// 8. Create audit log
 			await tx.insert(roomAuditLogs).values({
 				roomId: room.id,
-				action: "Book",
-				description: `Booked room ${room.id} from ${startDate} to ${endDate}`,
+				action: "Book successfully",
+				description: `Booked room ${room.number} from ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(
+					new Date(endDate),
+					"yyyy-MM-dd"
+				)}, by user ${user.email} (be careful with exposing this information)`,
+				price: price.toString(),
+			})
+
+			// 9. Create user audit log
+			await tx.insert(userAuditLogs).values({
+				userId: user.id,
+				action: "Book successfully",
+				description: `Booked room ${room.number} from ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(
+					new Date(endDate),
+					"yyyy-MM-dd"
+				)}`,
 			})
 		})
 
@@ -113,5 +135,83 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 		return new NextResponse(JSON.stringify({ error: error.message }), {
 			status: 500,
 		})
+	}
+}
+
+export async function DELETE(req: NextRequest, { params }: RouteProps) {
+	try {
+		const { roomId } = await params
+
+		// 1. Validate
+		const validateId = cancelBookingSchema.pick({ bookingId: true }).safeParse({ bookingId: roomId })
+
+		if (!validateId.success) {
+			return new NextResponse(JSON.stringify({ error: validateId.error.message }), { status: 400 })
+		}
+
+		const rawBody = await req.json()
+
+		const validateBody = cancelBookingSchema.safeParse(rawBody)
+
+		if (!validateBody.success) {
+			return new NextResponse(JSON.stringify({ error: validateBody.error.message }), { status: 400 })
+		}
+
+		const { bookingId, customerId } = validateBody.data
+
+		// 2. Get user session
+		const { user } = await getCurrentUser()
+
+		if (!user) {
+			return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 })
+		}
+
+		// 3. Validate the customer
+		if (customerId !== user.id) {
+			return new NextResponse(JSON.stringify({ error: "Cant cancel others bookings" }), { status: 401 })
+		}
+
+		// 4. Rate limit
+		const identifier = `ratelimit:delete-booking:${user.id}`
+		const { success } = await ratelimit.limit(identifier)
+
+		if (!success) {
+			return new NextResponse(JSON.stringify({ error: "Rate limit exceeded" }), { status: 429 })
+		}
+
+		// 5. Check for existing booking
+		const [existingBooking] = await db
+			.select()
+			.from(bookings)
+			.where(and(eq(bookings.id, bookingId), eq(bookings.customerId, user.id)))
+
+		if (!existingBooking) {
+			return new NextResponse(JSON.stringify({ error: "Booking not found" }), { status: 404 })
+		}
+
+		// 6. Transaction
+		await dbClient.transaction(async (tx) => {
+			// 7. Delete booking
+			await tx.delete(bookings).where(eq(bookings.id, bookingId))
+
+			// 8. Create audit log
+			await tx.insert(roomAuditLogs).values({
+				roomId: existingBooking.roomId,
+				action: "Cancel booking",
+				description: `Cancelled booking ${existingBooking.id}`,
+				price: existingBooking.price.toString(),
+			})
+
+			// 9. Create user audit log
+			await tx.insert(userAuditLogs).values({
+				userId: user.id,
+				action: "Cancel",
+				description: `Cancelled booking ${existingBooking.id}`,
+			})
+		})
+
+		return new NextResponse(JSON.stringify({ message: "Booking cancelled successfully" }), { status: 200 })
+	} catch (error: any) {
+		return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 })
 	}
 }

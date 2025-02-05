@@ -25,7 +25,7 @@ export function RoomGridItem({ room }: RoomGridItemProps) {
 					$ {room.price} <span className="text-muted-foreground font-normal text-sm">per night</span>
 				</div>
 
-				<Link className={cn(buttonVariants({ variant: "default" }))} href={`/rooms/${room.id}`} target="_blank">
+				<Link className={cn(buttonVariants({ variant: "default" }))} href={`/rooms/${room.id}`}>
 					Book Now
 				</Link>
 			</CardFooter>

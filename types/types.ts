@@ -1,3 +1,5 @@
+import { BookingType, RoomType } from "@/server/db/schemas/types"
+
 export const RoleTypes = {
 	OWNER: "owner",
 	MANAGER: "manager",
@@ -12,3 +14,7 @@ export const RoomCategory = {
 } as const
 
 export type RoomCategoryType = (typeof RoomCategory)[keyof typeof RoomCategory]
+
+export type BookingWithRoomType = BookingType & {
+	room: RoomType | null
+}

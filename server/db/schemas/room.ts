@@ -29,6 +29,7 @@ export const roomAuditLogs = pgTable("room_audit_logs", {
 	userId: text("user_id").references(() => users.id),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
+	price: numeric("price").notNull(),
 })
 
 export const roomAuditLogsRelations = relations(roomAuditLogs, ({ one }) => ({
