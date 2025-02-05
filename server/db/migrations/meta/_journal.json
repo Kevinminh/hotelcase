@@ -15,6 +15,20 @@
       "when": 1738764908125,
       "tag": "0001_fast_justice",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738765015785,
+      "tag": "0002_hard_maverick",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1738766882923,
+      "tag": "0003_true_mister_fear",
+      "breakpoints": true
     }
   ]
 }

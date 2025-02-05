@@ -1,6 +1,6 @@
 import { RoomCategoryType } from "@/types/types"
 import { relations } from "drizzle-orm"
-import { numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { integer, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { users } from "./user"
 
 export const rooms = pgTable("rooms", {
@@ -9,8 +9,12 @@ export const rooms = pgTable("rooms", {
 		.$defaultFn(() => crypto.randomUUID()),
 	number: text("number").notNull(),
 	category: text("category").notNull().$type<RoomCategoryType>().default("single_bed"),
-	image: text("image"),
+	description: text("description").notNull(),
+	image: text("image").notNull(),
 	price: numeric("price").notNull(),
+	guestCapacity: integer("guest_capacity").notNull(),
+	bedCount: integer("bed_count").notNull(),
+	bathroomCount: integer("bathroom_count").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
 })

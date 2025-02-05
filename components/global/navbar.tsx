@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { buttonVariants } from "./ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
-import { UserButton } from "./user-button"
+import { UserButton } from "@/components/global/user-button"
 
 export default async function Navbar() {
 	return (
@@ -19,11 +19,7 @@ export default async function Navbar() {
 								<span>Home</span>
 							</Link>
 						</li>
-						<li>
-							<Link href="/rooms" className={cn(buttonVariants({ variant: "link" }))}>
-								<span>Rooms</span>
-							</Link>
-						</li>
+
 						<li>
 							<UserButton />
 						</li>

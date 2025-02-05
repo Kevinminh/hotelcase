@@ -8,7 +8,7 @@ import Google from "next-auth/providers/google"
 import Resend from "next-auth/providers/resend"
 
 import { resend } from "@/lib/resend"
-import { MagicLinkMail } from "@/components/magic-link"
+import { MagicLinkMail } from "@/components/auth/magic-link"
 
 export const { auth, handlers, signIn } = NextAuth({
 	adapter: DrizzleAdapter(db, {
