@@ -18,6 +18,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { addDays, format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { signIn } from "next-auth/react"
+import { usePathname } from "next/navigation"
 
 type RoomBookingFormProps = {
 	room: Pick<
@@ -28,7 +30,10 @@ type RoomBookingFormProps = {
 }
 
 export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
+	const pathName = usePathname()
 	const { range, setRange } = useDateRangePicker()
+
+	const currentPathWithParams = `${pathName}?dateRange=${range.from.toISOString()}|${range.to.toISOString()}`
 
 	const form = useForm<CreateBookingSchemaType>({
 		resolver: zodResolver(createBookingSchema),
@@ -83,6 +88,13 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 		},
 		[handleBook]
 	)
+
+	const handleLogin = async (type: "google") => {
+		await signIn(type, {
+			redirect: true,
+			redirectTo: currentPathWithParams,
+		})
+	}
 
 	const totalPrice = React.useMemo(
 		() =>
@@ -165,9 +177,15 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 								/>
 							)}
 						/>
-						<Button type="submit" className="w-full" disabled={isPending || form.formState.isSubmitting}>
-							Book now
-						</Button>
+						{!userId ? (
+							<Button type="button" onClick={() => handleLogin("google")} className="w-full">
+								Login to Book
+							</Button>
+						) : (
+							<Button type="submit" className="w-full" disabled={isPending || form.formState.isSubmitting}>
+								Book now
+							</Button>
+						)}
 						<Separator />
 					</CardContent>
 
