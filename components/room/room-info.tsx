@@ -6,9 +6,10 @@ import { RoomAuditLog } from "./room-audit-log"
 type RoomInfoProps = {
 	room: Pick<RoomType, "id" | "number" | "category" | "guestCapacity" | "bedCount" | "bathroomCount" | "description">
 	roomAuditLogs: RoomAuditLogType[]
+	canViewAuditLog: boolean
 }
 
-export function RoomInfo({ room, roomAuditLogs }: RoomInfoProps) {
+export function RoomInfo({ room, roomAuditLogs, canViewAuditLog }: RoomInfoProps) {
 	return (
 		<div className="flex flex-col gap-y-4">
 			<div>
@@ -33,7 +34,7 @@ export function RoomInfo({ room, roomAuditLogs }: RoomInfoProps) {
 
 			<Separator />
 
-			<RoomAuditLog roomAuditLogs={roomAuditLogs} />
+			{canViewAuditLog && <RoomAuditLog roomAuditLogs={roomAuditLogs} />}
 		</div>
 	)
 }

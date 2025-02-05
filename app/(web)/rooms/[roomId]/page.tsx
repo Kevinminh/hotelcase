@@ -1,8 +1,10 @@
 import { PageWrapper } from "@/components/global/page-wrapper"
 import { RoomDetails } from "@/components/room/room-details"
 import { getCurrentUser } from "@/server/actions/auth"
+import { hasPermission } from "@/server/actions/permission"
 import { db } from "@/server/db/config"
 import { roomAuditLogs, rooms } from "@/server/db/schemas"
+import { PERMISSIONS } from "@/server/db/seeding/roles"
 import { desc, eq } from "drizzle-orm"
 
 type RoomPageProps = {
@@ -26,9 +28,16 @@ export default async function RoomPage({ params }: RoomPageProps) {
 		.where(eq(roomAuditLogs.roomId, roomId))
 		.orderBy(desc(roomAuditLogs.createdAt))
 
+	const canViewAuditLog = await hasPermission(PERMISSIONS.VIEW_AUDIT_LOG)
+
 	return (
 		<PageWrapper>
-			<RoomDetails room={room} userId={user?.id ?? null} roomAuditLogs={dbRoomAuditLogs} />
+			<RoomDetails
+				room={room}
+				userId={user?.id ?? null}
+				roomAuditLogs={dbRoomAuditLogs}
+				canViewAuditLog={canViewAuditLog}
+			/>
 		</PageWrapper>
 	)
 }

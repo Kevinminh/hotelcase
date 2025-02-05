@@ -23,6 +23,7 @@ export const PERMISSIONS = {
 	EDIT_HOTEL: "edit:hotel",
 	DELETE_HOTEL: "delete:hotel",
 	DELETE_USER: "delete:user",
+	VIEW_AUDIT_LOG: "view:audit-log",
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
@@ -34,6 +35,7 @@ export const defaultPermissions: DefaultPermissionsType[] = [
 	{ name: PERMISSIONS.EDIT_HOTEL, description: "Can edit hotel" },
 	{ name: PERMISSIONS.DELETE_HOTEL, description: "Can delete hotel" },
 	{ name: PERMISSIONS.DELETE_USER, description: "Can delete user" },
+	{ name: PERMISSIONS.VIEW_AUDIT_LOG, description: "Can view audit log" },
 ]
 
 export const defaultRoles: DefaultRolesType[] = [
