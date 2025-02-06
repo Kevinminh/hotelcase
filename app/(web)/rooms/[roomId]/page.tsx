@@ -45,7 +45,12 @@ export default async function RoomPage({ params }: RoomPageProps) {
 	}
 
 	const [dbRoomAuditLogs, roomBookings, canViewAuditLog] = await Promise.all([
-		db.select().from(roomAuditLogs).where(eq(roomAuditLogs.roomId, roomId)).orderBy(desc(roomAuditLogs.createdAt)),
+		db
+			.select()
+			.from(roomAuditLogs)
+			.where(eq(roomAuditLogs.roomId, roomId))
+			.orderBy(desc(roomAuditLogs.createdAt))
+			.limit(100),
 		db.select().from(bookings).where(eq(bookings.roomId, roomId)),
 		hasPermission(PERMISSIONS.VIEW_AUDIT_LOG),
 	])

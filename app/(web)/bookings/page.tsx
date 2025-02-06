@@ -33,6 +33,8 @@ export default async function BookingsPage() {
 		}),
 		db.query.userAuditLogs.findMany({
 			where: eq(userAuditLogs.userId, user.id),
+			orderBy: [desc(userAuditLogs.createdAt)],
+			limit: 100,
 		}),
 	])
 
