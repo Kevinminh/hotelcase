@@ -134,10 +134,8 @@ export async function initializeRBAC() {
 			}
 		}
 
-		// eslint-disable-next-line no-console
 		console.log("RBAC initialization completed successfully")
 	} catch (error) {
-		// eslint-disable-next-line no-console
 		console.error("Error initializing RBAC:", error)
 		throw error
 	}

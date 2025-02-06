@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
 		// 6. Store the API key in the database
 		await db.insert(apiKeys).values({
-			key: apiKey, // Store the full encrypted key
+			key: apiKey,
 			userId: user.id,
 			expiresAt: expiresAt,
 		})

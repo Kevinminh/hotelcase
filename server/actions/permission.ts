@@ -35,7 +35,7 @@ export async function hasPermission(requiredPermission: Permission): Promise<boo
 		// Check if role has any permissions
 		const userPermissions = result.permissions.map((rp) => rp.permission.name)
 
-		// If user has wildcard permission (*), they have access to everything
+		// If user has "*" they have permission to everything
 		if (userPermissions.includes("*")) return true
 
 		// Check if user has the specific permission

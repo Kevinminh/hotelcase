@@ -10,8 +10,8 @@ import { RATE_LIMIT_10 } from "@/lib/constants"
 import { RATE_LIMIT_1_MINUTE } from "@/lib/constants"
 import { getCurrentUser } from "@/server/actions/auth"
 import { format } from "date-fns"
-import { hasPermission } from "@/server/actions/permission"
-import { PERMISSIONS } from "@/server/db/seeding/roles"
+// import { hasPermission } from "@/server/actions/permission"
+// import { PERMISSIONS } from "@/server/db/seeding/roles"
 import { resend } from "@/lib/resend"
 import { ReceiptMail } from "@/components/bookings/receipt-mail"
 
@@ -37,7 +37,8 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 
 		const rawBody = await req.json()
 
-		// Convert string dates to Date objects before validation
+		// Convert string dates to Date objects before validation - this is to avoid the error:
+		// "Invalid date" when the date is not in the correct format
 		const body = {
 			...rawBody,
 			startDate: new Date(rawBody.startDate),
@@ -76,25 +77,25 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 			})
 		}
 
-		// 4. Check if user has permission to book
-		const userHasPermission = await hasPermission(PERMISSIONS.BOOK_HOTEL)
+		// // 4. Check if user has permission to book
+		// const userHasPermission = await hasPermission(PERMISSIONS.BOOK_HOTEL)
 
-		if (!userHasPermission) {
-			await dbClient.transaction(async (tx) => {
-				await tx.insert(roomAuditLogs).values({
-					roomId: roomId,
-					action: "Failed to book",
-					description: `User ${user.email} does not have permission to book`,
-					price: price.toString(),
-				})
-				await tx.insert(userAuditLogs).values({
-					userId: user.id,
-					action: "Failed to book",
-					description: `User ${user.email} does not have permission to book`,
-				})
-			})
-			return new NextResponse(JSON.stringify({ error: "You do not have permission to book" }), { status: 401 })
-		}
+		// if (!userHasPermission) {
+		// 	await dbClient.transaction(async (tx) => {
+		// 		await tx.insert(roomAuditLogs).values({
+		// 			roomId: roomId,
+		// 			action: "Failed to book",
+		// 			description: `User ${user.email} does not have permission to book`,
+		// 			price: price.toString(),
+		// 		})
+		// 		await tx.insert(userAuditLogs).values({
+		// 			userId: user.id,
+		// 			action: "Failed to book",
+		// 			description: `User ${user.email} does not have permission to book`,
+		// 		})
+		// 	})
+		// 	return new NextResponse(JSON.stringify({ error: "You do not have permission to book" }), { status: 401 })
+		// }
 
 		// 4. Rate limit
 		const identifier = `ratelimit:create-booking:${user.id}`
@@ -232,7 +233,6 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					amount: price,
 					productName: room.number,
 					desc: `HotelCase: ${room.number}`,
-					// Handle cases where paymentMethod might be null for free products
 					brand: "Free",
 					last4: "N/A",
 					paymentType: "Free",

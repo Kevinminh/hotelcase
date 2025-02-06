@@ -34,7 +34,6 @@ export const { auth, handlers, signIn } = NextAuth({
 				const email = process.env.RESEND_EMAIL as string
 				const isUserVerified = user?.emailVerified
 
-				// TODO
 				if (isUserVerified) {
 					const result = await resend.emails.send({
 						from: email,
@@ -50,7 +49,6 @@ export const { auth, handlers, signIn } = NextAuth({
 						throw new Error(result.error?.message)
 					}
 				}
-				// TODO
 				const result = await resend.emails.send({
 					from: email,
 					to: identifier,

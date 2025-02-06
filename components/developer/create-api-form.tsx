@@ -39,15 +39,15 @@ export function CreateApiForm() {
 			return response.json()
 		},
 		onSuccess: (data) => {
+			router.refresh()
 			toast.success("API key created", {
 				description: `Your API key: ${data.key}. Make sure to copy it now, you won't be able to see it again.`,
 			})
 			form.reset()
-			router.refresh()
 		},
 		onError: (error: Error) => {
-			toast.error(error.message || "Failed to create API key")
 			router.refresh()
+			toast.error(error.message || "Failed to create API key")
 		},
 	})
 

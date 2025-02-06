@@ -30,12 +30,12 @@ export async function UserButton() {
 	return (
 		<>
 			<li>
-				<Link href="/developer" className={cn(buttonVariants({ variant: "link" }))}>
+				<Link href="/developer" className={cn(buttonVariants({ variant: "link", className: "hidden md:flex" }))}>
 					<span>Developer</span>
 				</Link>
 			</li>
 			<li>
-				<Link href="/manage-rooms" className={cn(buttonVariants({ variant: "link" }))}>
+				<Link href="/manage-rooms" className={cn(buttonVariants({ variant: "link", className: "hidden md:flex" }))}>
 					<span>Manage rooms</span>
 				</Link>
 			</li>

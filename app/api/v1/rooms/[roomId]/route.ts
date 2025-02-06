@@ -81,12 +81,6 @@ export async function POST(request: Request, { params }: RouteProps) {
 			return new NextResponse(JSON.stringify({ error: "Invalid API key" }), { status: 401 })
 		}
 
-		// const decryptedKey = verifyApiKey(apiKey, ENCRYPTION_KEY)
-
-		// if (!decryptedKey) {
-		// 	return new NextResponse(JSON.stringify({ error: "Invalid API key" }), { status: 401 })
-		// }
-
 		const room = await db.query.rooms.findFirst({
 			where: eq(rooms.id, roomId),
 		})

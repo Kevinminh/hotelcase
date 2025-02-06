@@ -56,6 +56,8 @@ export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormP
 		},
 	})
 
+	const cleaningFee = 70
+
 	// Keep form in sync with URL state
 	useEffect(() => {
 		// Only update form if we have a complete range
@@ -66,7 +68,7 @@ export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormP
 			// Calculate and update total price
 			const numberOfNights = Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) + 1
 			const roomTotal = numberOfNights * Number(room.price)
-			const totalPrice = roomTotal + 70 // Add cleaning fee
+			const totalPrice = roomTotal + cleaningFee
 			form.setValue("price", totalPrice, { shouldValidate: true })
 		}
 	}, [form, range.from, range.to, room.price])
@@ -96,7 +98,7 @@ export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormP
 				customerId: userId,
 				startDate: initialStartDate,
 				endDate: initialEndDate,
-				price: Number(room.price) * 2 + 70, // 2 days + cleaning fee
+				price: Number(room.price) * 2 + cleaningFee, // 2 days + cleaning fee
 			})
 
 			router.refresh()
