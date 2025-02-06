@@ -46,7 +46,7 @@ export function BookingList({ bookings, userId }: BookingListProps) {
 				<CardTitle>My bookings</CardTitle>
 			</CardHeader>
 			<CardContent>
-				{bookings ? (
+				{bookings.length ? (
 					<ScrollArea className="h-80">
 						<table className="w-full">
 							<thead>

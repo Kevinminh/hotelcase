@@ -1,13 +1,15 @@
 import { PageWrapper } from "@/components/global/page-wrapper"
 import { getCurrentUser } from "@/server/actions/auth"
 import { db } from "@/server/db/config"
-import { eq } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { bookings, userAuditLogs } from "@/server/db/schemas"
 import { redirect } from "next/navigation"
 import React from "react"
 import { UserAuditLog } from "@/components/bookings/user-audit-log"
 import { BookingList } from "@/components/bookings/booking-list"
 import { Metadata } from "next"
+import { BookingCard } from "@/components/bookings/booking-card"
+import { CopyButton } from "@/components/global/copy-button"
 
 export const metadata: Metadata = {
 	title: "Bookings",
@@ -27,6 +29,7 @@ export default async function BookingsPage() {
 			with: {
 				room: true,
 			},
+			orderBy: [desc(bookings.createdAt)],
 		}),
 		db.query.userAuditLogs.findMany({
 			where: eq(userAuditLogs.userId, user.id),
@@ -36,9 +39,13 @@ export default async function BookingsPage() {
 	return (
 		<PageWrapper>
 			<div className="flex flex-col gap-y-4">
-				<span className="text-sm text-muted-foreground">My cusomer ID: {user.id}</span>
-				<BookingList bookings={dbBookings} userId={user.id} />
+				<div className="flex items-center gap-x-2">
+					<span className="text-sm text-muted-foreground">My cusomer ID: {user.id}</span>
+					<CopyButton text={user.id} />
+				</div>
 
+				<BookingCard booking={dbBookings[0]} />
+				<BookingList bookings={dbBookings} userId={user.id} />
 				<UserAuditLog userAuditLogs={dbUserAuditLogs} />
 			</div>
 		</PageWrapper>

@@ -13,7 +13,7 @@ export default function Navbar() {
 				</Link>
 
 				<nav>
-					<ul className="flex items-center gap-x-2">
+					<ul className="flex items-center ">
 						<li>
 							<Link href="/" className={cn(buttonVariants({ variant: "link" }))}>
 								<span>Home</span>
