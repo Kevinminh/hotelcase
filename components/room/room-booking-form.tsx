@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { createBookingSchema, CreateBookingSchemaType } from "@/lib/schema"
 import { Button } from "../ui/button"
 import { useDateRangePicker } from "@/hooks/use-date-range-picker"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import React from "react"
 import { toast } from "sonner"
@@ -31,6 +31,7 @@ type RoomBookingFormProps = {
 }
 
 export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormProps) {
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const pathName = usePathname()
 	const router = useRouter()
 	const { range, setRange } = useDateRangePicker()
@@ -117,10 +118,12 @@ export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormP
 	)
 
 	const handleLogin = async (type: "google") => {
+		setIsLoading(true)
 		await signIn(type, {
 			redirect: true,
 			redirectTo: currentPathWithParams,
 		})
+		setIsLoading(false)
 	}
 
 	return (
@@ -203,7 +206,7 @@ export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormP
 							)}
 						/>
 						{!userId ? (
-							<Button type="button" onClick={() => handleLogin("google")} className="w-full">
+							<Button type="button" onClick={() => handleLogin("google")} className="w-full" disabled={isLoading}>
 								Login to Book
 							</Button>
 						) : (
