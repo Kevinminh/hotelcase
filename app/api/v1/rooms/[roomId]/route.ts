@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { createBookingSchema } from "@/lib/schema"
 import { db } from "@/server/db/config"
 import { rooms } from "@/server/db/schemas"
 import { eq } from "drizzle-orm"
@@ -55,8 +56,14 @@ export async function POST(request: Request, { params }: { params: { roomId: str
 	try {
 		const { roomId } = params
 
-		// const body = await request.json()
+		const body = await request.json()
 		// const { apiKey } = body
+
+		const validateBody = createBookingSchema.safeParse(body)
+
+		if (!validateBody.success) {
+			return new NextResponse(JSON.stringify({ error: validateBody.error.message }), { status: 400 })
+		}
 
 		// const decryptedKey = verifyApiKey(apiKey, ENCRYPTION_KEY)
 
@@ -72,7 +79,7 @@ export async function POST(request: Request, { params }: { params: { roomId: str
 			return new NextResponse(JSON.stringify({ error: "Room not found" }), { status: 404 })
 		}
 
-		return new NextResponse(JSON.stringify(room), { status: 200 })
+		return new NextResponse(JSON.stringify("Room booked successfully"), { status: 200 })
 	} catch (error: any) {
 		return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 })
 	}

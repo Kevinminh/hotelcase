@@ -61,18 +61,37 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 
 		// 3. Validate the customer
 		if (customerId !== user.id) {
-			return new NextResponse(JSON.stringify({ error: "Cant book for others" }), { status: 401 })
+			await dbClient.transaction(async (tx) => {
+				await tx.insert(roomAuditLogs).values({
+					roomId: roomId,
+					action: "Failed to book",
+					description: `User ${user.email} tried to book for another user`,
+					price: price.toString(),
+				})
+				await tx.insert(userAuditLogs).values({
+					userId: user.id,
+					action: "Failed to book",
+					description: `User ${user.email} tried to book for another user`,
+				})
+			})
 		}
 
 		// 4. Check if user has permission to book
 		const userHasPermission = await hasPermission(PERMISSIONS.BOOK_HOTEL)
 
 		if (!userHasPermission) {
-			await dbClient.insert(roomAuditLogs).values({
-				roomId: roomId,
-				action: "Failed to book",
-				description: `User ${user.email} does not have permission to book`,
-				price: price.toString(),
+			await dbClient.transaction(async (tx) => {
+				await tx.insert(roomAuditLogs).values({
+					roomId: roomId,
+					action: "Failed to book",
+					description: `User ${user.email} does not have permission to book`,
+					price: price.toString(),
+				})
+				await tx.insert(userAuditLogs).values({
+					userId: user.id,
+					action: "Failed to book",
+					description: `User ${user.email} does not have permission to book`,
+				})
 			})
 			return new NextResponse(JSON.stringify({ error: "You do not have permission to book" }), { status: 401 })
 		}
@@ -82,6 +101,19 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 		const { success } = await ratelimit.limit(identifier)
 
 		if (!success) {
+			await dbClient.transaction(async (tx) => {
+				await tx.insert(roomAuditLogs).values({
+					roomId: roomId,
+					action: "Failed to book",
+					description: `User ${user.email} has exceeded the rate limit`,
+					price: price.toString(),
+				})
+				await tx.insert(userAuditLogs).values({
+					userId: user.id,
+					action: "Failed to book",
+					description: `User ${user.email} has exceeded the rate limit`,
+				})
+			})
 			return new NextResponse(JSON.stringify({ error: "Rate limit exceeded" }), { status: 429 })
 		}
 
@@ -91,10 +123,50 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 		const [room] = await db.select().from(rooms).where(eq(rooms.id, validatedId.roomId)).limit(1)
 
 		if (!room) {
-			return new NextResponse(JSON.stringify({ error: "Room not found" }), { status: 404 })
+			await dbClient.transaction(async (tx) => {
+				await tx.insert(roomAuditLogs).values({
+					roomId: validatedId.roomId,
+					action: "Failed to book",
+					description: `Room ${validatedId.roomId} not found`,
+					price: price.toString(),
+				})
+				await tx.insert(userAuditLogs).values({
+					userId: user.id,
+					action: "Failed to book",
+					description: `Room ${validatedId.roomId} not found`,
+				})
+			})
 		}
 
-		// 6. Check for existing booking (start and end date)
+		// 6. Check if the dates are in the past
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		const normalizedStartDate = new Date(startDate)
+		normalizedStartDate.setHours(0, 0, 0, 0)
+
+		const normalizedEndDate = new Date(endDate)
+		normalizedEndDate.setHours(0, 0, 0, 0)
+
+		if (normalizedStartDate < today || normalizedEndDate < today) {
+			await dbClient.transaction(async (tx) => {
+				await tx.insert(roomAuditLogs).values({
+					roomId: room.id,
+					action: "Failed to book",
+					description: `Room ${room.number} is not available for the selected dates: ${format(normalizedStartDate, "yyyy-MM-dd")} to ${format(normalizedEndDate, "yyyy-MM-dd")}`,
+					price: price.toString(),
+				})
+				await tx.insert(userAuditLogs).values({
+					userId: user.id,
+					action: "Failed to book",
+					description: `Room ${room.number} is not available for the selected dates: ${format(normalizedStartDate, "yyyy-MM-dd")} to ${format(normalizedEndDate, "yyyy-MM-dd")}`,
+				})
+			})
+
+			return new NextResponse(JSON.stringify({ error: "Dates cannot be in the past" }), { status: 400 })
+		}
+
+		// 7. Check for existing booking (start and end date)
 		const [existingBooking] = await db
 			.select()
 			.from(bookings)
@@ -104,7 +176,7 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 			await dbClient.insert(roomAuditLogs).values({
 				roomId: room.id,
 				action: "Failed to book",
-				description: `Room ${room.number} is not available for the selected dates: ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(new Date(endDate), "yyyy-MM-dd")}`,
+				description: `Room ${room.number} is not available for the selected dates: ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(new Date(endDate), "yyyy-MM-dd")}, by user ${user.email}`,
 				price: price.toString(),
 			})
 			return new NextResponse(JSON.stringify({ error: "Room is not available for the selected dates" }), {

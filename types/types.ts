@@ -31,3 +31,16 @@ export type sendReceiptType = {
 	paymentType: string
 	licenseUrl: string
 }
+
+export type RoomAuditLogActionType =
+	| "Failed to book"
+	| "Failed to cancel"
+	| "Failed to create"
+	| "Failed to update"
+	| "Failed to delete"
+	| "Book successfully"
+	| "Cancel successfully"
+	| "Cancel booking"
+	| "Create successfully"
+	| "Update successfully"
+	| "Delete successfully"

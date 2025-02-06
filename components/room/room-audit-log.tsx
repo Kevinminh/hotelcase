@@ -1,6 +1,7 @@
 import { RoomAuditLogType } from "@/server/db/schemas/types"
 import { ScrollArea } from "../ui/scroll-area"
 import { Separator } from "../ui/separator"
+import { cn } from "@/lib/utils"
 
 type RoomAuditLogProps = {
 	roomAuditLogs: RoomAuditLogType[]
@@ -14,7 +15,15 @@ export function RoomAuditLog({ roomAuditLogs }: RoomAuditLogProps) {
 				<ScrollArea className="max-h-80 flex-1">
 					<div className="flex flex-col gap-y-2 h-full">
 						{roomAuditLogs.map((log) => (
-							<div key={log.id} className="rounded-md border p-4 flex flex-col gap-y-2">
+							<div
+								key={log.id}
+								className={cn("rounded-md border p-4 flex flex-col gap-y-2", {
+									"bg-red-500/5 text-red-600": log.action === "Failed to book",
+									"bg-green-500/5 text-green-600": log.action === "Book successfully",
+									"bg-blue-500/5 text-blue-600": log.action === "Cancel booking",
+									"bg-yellow-500/5 text-yellow-600": log.action === "Failed to cancel",
+								})}
+							>
 								<span className="text-sm ">{log.description}</span>
 
 								<div className="flex items-center gap-x-2">

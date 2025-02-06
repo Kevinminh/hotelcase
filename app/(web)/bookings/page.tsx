@@ -36,6 +36,7 @@ export default async function BookingsPage() {
 	return (
 		<PageWrapper>
 			<div className="flex flex-col gap-y-4">
+				<span className="text-sm text-muted-foreground">My cusomer ID: {user.id}</span>
 				<BookingList bookings={dbBookings} userId={user.id} />
 
 				<UserAuditLog userAuditLogs={dbUserAuditLogs} />
