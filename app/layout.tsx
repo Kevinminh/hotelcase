@@ -26,6 +26,14 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
+			<head>
+				<script
+					async
+					data-website-id="-9TB9tXVJlGc2b3ECGo_Y353"
+					data-domain="hotelcase.vercel.app"
+					src="https://datah.co/js/script.js"
+				></script>
+			</head>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<Providers>
 					<Navbar />
