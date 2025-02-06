@@ -1,5 +1,5 @@
 "use client"
-import { RoomType } from "@/server/db/schemas/types"
+import { BookingType, RoomType } from "@/server/db/schemas/types"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { useForm } from "react-hook-form"
@@ -27,14 +27,23 @@ type RoomBookingFormProps = {
 		"id" | "price" | "number" | "category" | "guestCapacity" | "bedCount" | "bathroomCount" | "description"
 	>
 	userId: string | null
+	roomBookings: BookingType[]
 }
 
-export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
+export function RoomBookingForm({ room, userId, roomBookings }: RoomBookingFormProps) {
 	const pathName = usePathname()
 	const router = useRouter()
 	const { range, setRange } = useDateRangePicker()
 
 	const currentPathWithParams = `${pathName}?dateRange=${range.from.toISOString()}|${range.to.toISOString()}`
+
+	// Function to check if a date is booked
+	const isDateBooked = React.useCallback(
+		(date: Date) => {
+			return roomBookings.some((booking) => date >= new Date(booking.startDate) && date <= new Date(booking.endDate))
+		},
+		[roomBookings]
+	)
 
 	const form = useForm<CreateBookingSchemaType>({
 		resolver: zodResolver(createBookingSchema),
@@ -177,7 +186,11 @@ export function RoomBookingForm({ room, userId }: RoomBookingFormProps) {
 															}
 														}}
 														numberOfMonths={2}
-														disabled={(date) => date < new Date()}
+														disabled={(date) => {
+															const today = new Date()
+															today.setHours(0, 0, 0, 0)
+															return date < today || isDateBooked(date)
+														}}
 													/>
 												</PopoverContent>
 											</Popover>

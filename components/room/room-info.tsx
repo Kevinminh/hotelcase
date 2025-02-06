@@ -18,13 +18,13 @@ export function RoomInfo({ room, roomAuditLogs, canViewAuditLog }: RoomInfoProps
 					<li className="-ml-4">
 						<p>{getRoomCategoryName(room.category)}</p>
 					</li>
-					<li>
+					<li className="ml-2">
 						<p>{room.guestCapacity} guests</p>
 					</li>
-					<li>
+					<li className="ml-2">
 						<p>{room.bedCount} beds</p>
 					</li>
-					<li>
+					<li className="ml-2">
 						<p>{room.bathroomCount} bathrooms</p>
 					</li>
 				</ul>

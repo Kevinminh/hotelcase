@@ -9,7 +9,7 @@ type RoomAuditLogProps = {
 export function RoomAuditLog({ roomAuditLogs }: RoomAuditLogProps) {
 	return (
 		<div className="flex flex-col gap-y-2">
-			<h2 className="text-lg font-semibold">Audit Logs</h2>
+			<h2 className="text-lg font-semibold">Audit Logs (For managers)</h2>
 			{roomAuditLogs.length ? (
 				<ScrollArea className="max-h-80 flex-1">
 					<div className="flex flex-col gap-y-2 h-full">
