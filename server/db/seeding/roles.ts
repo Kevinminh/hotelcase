@@ -26,6 +26,7 @@ export const PERMISSIONS = {
 	VIEW_AUDIT_LOG: "view:audit-log",
 	VIEW_DEVELOPER: "view:developer",
 	CREATE_API_KEY: "create:api-key",
+	DELETE_ROOM: "delete:room",
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
@@ -40,6 +41,7 @@ export const defaultPermissions: DefaultPermissionsType[] = [
 	{ name: PERMISSIONS.VIEW_AUDIT_LOG, description: "Can view audit log" },
 	{ name: PERMISSIONS.VIEW_DEVELOPER, description: "Can view developer" },
 	{ name: PERMISSIONS.CREATE_API_KEY, description: "Can create api key" },
+	{ name: PERMISSIONS.DELETE_ROOM, description: "Can delete room" },
 ]
 
 export const defaultRoles: DefaultRolesType[] = [

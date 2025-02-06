@@ -29,3 +29,7 @@ export const externalCreateBookingSchema = z.object({
 	price: z.number(),
 	apiKey: z.string().min(32).max(200),
 })
+
+export const deleteRoomSchema = z.object({
+	roomId: z.string(),
+})

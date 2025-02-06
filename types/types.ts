@@ -44,3 +44,4 @@ export type RoomAuditLogActionType =
 	| "Create successfully"
 	| "Update successfully"
 	| "Delete successfully"
+	| "Delete room"
