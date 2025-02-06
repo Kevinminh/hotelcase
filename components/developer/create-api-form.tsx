@@ -9,19 +9,17 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
-
-const createApiSchema = z.object({
-	name: z.string().min(1, "Name is required").max(50, "Name must be less than 50 characters"),
-	expiresIn: z.string().regex(/^\d+$/, "Must be a number").optional(),
-})
+import { createApiSchema } from "@/lib/schema"
+import { useRouter } from "next/navigation"
 
 type CreateApiSchemaType = z.infer<typeof createApiSchema>
 
 export function CreateApiForm() {
+	const router = useRouter()
+
 	const form = useForm<CreateApiSchemaType>({
 		resolver: zodResolver(createApiSchema),
 		defaultValues: {
-			name: "",
 			expiresIn: "30",
 		},
 	})
@@ -45,9 +43,11 @@ export function CreateApiForm() {
 				description: `Your API key: ${data.key}. Make sure to copy it now, you won't be able to see it again.`,
 			})
 			form.reset()
+			router.refresh()
 		},
 		onError: (error: Error) => {
 			toast.error(error.message || "Failed to create API key")
+			router.refresh()
 		},
 	})
 
@@ -65,21 +65,7 @@ export function CreateApiForm() {
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Name</FormLabel>
-									<FormControl>
-										<Input placeholder="My API Key" {...field} />
-									</FormControl>
-									<FormDescription>A name to help you identify this API key later.</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<FormField
 							control={form.control}
 							name="expiresIn"

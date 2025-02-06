@@ -6,7 +6,7 @@ export const apiKeys = pgTable("api_keys", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	name: varchar("name", { length: 50 }).notNull(),
+	name: varchar("name", { length: 50 }),
 	key: text("key").notNull().unique(),
 	userId: text("user_id")
 		.references(() => users.id, { onDelete: "cascade" })

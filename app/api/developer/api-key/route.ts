@@ -6,12 +6,12 @@ import { PERMISSIONS } from "@/server/db/seeding/roles"
 import { db } from "@/server/db/config"
 import { apiKeys } from "@/server/db/schemas/api"
 import { addDays } from "date-fns"
-import { randomBytes, createCipheriv, createHash } from "crypto"
 import { Ratelimit } from "@upstash/ratelimit"
 import { redis } from "@/lib/upstash"
 import { RATE_LIMIT_10 } from "@/lib/constants"
 import { RATE_LIMIT_1_MINUTE } from "@/lib/constants"
 import { createApiSchema } from "@/lib/schema"
+import { generateApiKey } from "@/lib/utils"
 
 const ENCRYPTION_KEY = process.env.API_KEY_SECRET as string
 if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
@@ -54,62 +54,28 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 4. Generate API key and its hash
-		const apiKey = generateApiKey()
-		const hashedKey = hashApiKey(apiKey)
+		const apiKey = generateApiKey(ENCRYPTION_KEY)
 
 		// 5. Calculate expiration date if provided
 		const expiresAt = validatedData.data.expiresIn ? addDays(new Date(), parseInt(validatedData.data.expiresIn)) : null
 
-		// 6. Store the hashed key in the database
+		// 6. Store the API key in the database
 		await db.insert(apiKeys).values({
-			name: validatedData.data.name,
-			key: hashedKey,
+			key: apiKey, // Store the full encrypted key
 			userId: user.id,
 			expiresAt: expiresAt,
 		})
 
-		// 7. Return the unhashed key (will only be shown once)
+		// 7. Return the key (will only be shown once)
 		return new NextResponse(
 			JSON.stringify({
 				key: apiKey,
-				name: validatedData.data.name,
 				expiresAt: expiresAt,
 			}),
 			{ status: 201 }
 		)
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Error creating API key:", error)
 		return new NextResponse(JSON.stringify({ error: "Failed to create API key" }), { status: 500 })
 	}
-}
-
-/**
- * Generate a secure API key
- * @returns The generated API key
- */
-function generateApiKey(): string {
-	// Generate a random IV
-	const iv = randomBytes(16)
-
-	// Generate the raw key
-	const rawKey = randomBytes(32).toString("hex")
-
-	// Create cipher with key and IV
-	const cipher = createCipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY), iv)
-
-	// Encrypt the key
-	let encryptedKey = cipher.update(rawKey, "utf8", "hex")
-	encryptedKey += cipher.final("hex")
-
-	// Combine IV and encrypted key with prefix
-	return `hc_${iv.toString("hex")}${encryptedKey}`
-}
-
-/**
- * Hash the API key for storage
- * @param key - The API key to hash
- * @returns The hashed API key
- */
-function hashApiKey(key: string): string {
-	return createHash("sha256").update(key).digest("hex")
 }
