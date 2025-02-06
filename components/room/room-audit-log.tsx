@@ -2,6 +2,8 @@ import { RoomAuditLogType } from "@/server/db/schemas/types"
 import { ScrollArea } from "../ui/scroll-area"
 import { Separator } from "../ui/separator"
 import { cn } from "@/lib/utils"
+import { ActionTooltip } from "../global/action-tooltip"
+import { InfoIcon } from "lucide-react"
 
 type RoomAuditLogProps = {
 	roomAuditLogs: RoomAuditLogType[]
@@ -30,6 +32,18 @@ export function RoomAuditLog({ roomAuditLogs }: RoomAuditLogProps) {
 									<span className="text-sm text-muted-foreground">{log.createdAt.toLocaleString()}</span>
 									<Separator orientation="vertical" className="h-4" />
 									<span className="text-sm font-medium text-muted-foreground">Action: {log.action}</span>
+									<Separator orientation="vertical" className="h-4" />
+									<ActionTooltip label={""} content={<div>{JSON.stringify(log.metadata)}</div>}>
+										<div className="text-sm font-medium text-muted-foreground flex items-center gap-x-1">
+											Metadata <InfoIcon className="size-3" />
+										</div>
+									</ActionTooltip>
+									<Separator orientation="vertical" className="h-4" />
+									<ActionTooltip label={""} content={<div>{JSON.stringify(log.changes)}</div>}>
+										<div className="text-sm font-medium text-muted-foreground flex items-center gap-x-1">
+											Changes <InfoIcon className="size-3" />
+										</div>
+									</ActionTooltip>
 								</div>
 							</div>
 						))}

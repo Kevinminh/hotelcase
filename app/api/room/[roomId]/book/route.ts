@@ -28,6 +28,9 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 	try {
 		const { roomId } = await params
 
+		const ip = req.headers.get("x-forwarded-for") || "unknown"
+		const userAgent = req.headers.get("user-agent")
+
 		// 1. Validate request body
 		const validateId = createBookingSchema.pick({ roomId: true }).safeParse({ roomId })
 
@@ -68,11 +71,35 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					action: "Failed to book",
 					description: `User ${user.email} tried to book for another user`,
 					price: price.toString(),
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 				await tx.insert(userAuditLogs).values({
 					userId: user.id,
 					action: "Failed to book",
 					description: `User ${user.email} tried to book for another user`,
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 			})
 		}
@@ -108,11 +135,35 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					action: "Failed to book",
 					description: `User ${user.email} has exceeded the rate limit`,
 					price: price.toString(),
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 				await tx.insert(userAuditLogs).values({
 					userId: user.id,
 					action: "Failed to book",
 					description: `User ${user.email} has exceeded the rate limit`,
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 			})
 			return new NextResponse(JSON.stringify({ error: "Rate limit exceeded" }), { status: 429 })
@@ -130,11 +181,35 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					action: "Failed to book",
 					description: `Room ${validatedId.roomId} not found`,
 					price: price.toString(),
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 				await tx.insert(userAuditLogs).values({
 					userId: user.id,
 					action: "Failed to book",
 					description: `Room ${validatedId.roomId} not found`,
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 			})
 		}
@@ -156,11 +231,35 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					action: "Failed to book",
 					description: `Room ${room.number} is not available for the selected dates: ${format(normalizedStartDate, "yyyy-MM-dd")} to ${format(normalizedEndDate, "yyyy-MM-dd")}`,
 					price: price.toString(),
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 				await tx.insert(userAuditLogs).values({
 					userId: user.id,
 					action: "Failed to book",
 					description: `Room ${room.number} is not available for the selected dates: ${format(normalizedStartDate, "yyyy-MM-dd")} to ${format(normalizedEndDate, "yyyy-MM-dd")}`,
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
 				})
 			})
 
@@ -174,11 +273,42 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 			.where(and(eq(bookings.roomId, room.id), lte(bookings.startDate, endDate), gte(bookings.endDate, startDate)))
 
 		if (existingBooking) {
-			await dbClient.insert(roomAuditLogs).values({
-				roomId: room.id,
-				action: "Failed to book",
-				description: `Room ${room.number} is not available for the selected dates: ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(new Date(endDate), "yyyy-MM-dd")}, by user ${user.email}`,
-				price: price.toString(),
+			await dbClient.transaction(async (tx) => {
+				await tx.insert(roomAuditLogs).values({
+					roomId: room.id,
+					action: "Failed to book",
+					description: `Room ${room.number} is not available for the selected dates: ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(new Date(endDate), "yyyy-MM-dd")}, by user ${user.email}`,
+					price: price.toString(),
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
+				})
+				await tx.insert(userAuditLogs).values({
+					userId: user.id,
+					action: "Failed to book",
+					description: `Room ${room.number} is not available for the selected dates: ${format(new Date(startDate), "yyyy-MM-dd")} to ${format(new Date(endDate), "yyyy-MM-dd")}, by user ${user.email}`,
+					changes: {
+						before: {
+							customerId: customerId,
+						},
+						after: {
+							customerId: user.id,
+						},
+					},
+					metadata: {
+						ip: ip,
+						userAgent: userAgent,
+					},
+				})
 			})
 			return new NextResponse(JSON.stringify({ error: "Room is not available for the selected dates" }), {
 				status: 400,
@@ -209,6 +339,18 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					new Date(endDate),
 					"yyyy-MM-dd"
 				)}, by user ${user.email} (be careful with exposing this information)`,
+				changes: {
+					before: {
+						customerId: customerId,
+					},
+					after: {
+						customerId: user.id,
+					},
+				},
+				metadata: {
+					ip: ip,
+					userAgent: userAgent,
+				},
 				price: price.toString(),
 			})
 
@@ -220,6 +362,18 @@ export async function POST(req: NextRequest, { params }: RouteProps) {
 					new Date(endDate),
 					"yyyy-MM-dd"
 				)}`,
+				changes: {
+					before: {
+						customerId: customerId,
+					},
+					after: {
+						customerId: user.id,
+					},
+				},
+				metadata: {
+					ip: ip,
+					userAgent: userAgent,
+				},
 			})
 			// 10. Send email
 			await resend.emails.send({

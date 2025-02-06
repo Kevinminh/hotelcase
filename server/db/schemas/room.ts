@@ -1,6 +1,6 @@
 import { RoomAuditLogActionType, RoomCategoryType } from "@/types/types"
 import { relations } from "drizzle-orm"
-import { integer, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { integer, jsonb, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { users } from "./user"
 
 export const rooms = pgTable("rooms", {
@@ -29,6 +29,9 @@ export const roomAuditLogs = pgTable("room_audit_logs", {
 	userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
+	metadata: jsonb("metadata"),
+	changes: jsonb("changes"),
+
 	price: numeric("price").notNull(),
 })
 

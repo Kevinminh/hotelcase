@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { jsonb, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { roles } from "./permission"
 
 export const onboardingStatusEnum = pgEnum("onboarding_status", ["not_started", "in_progress", "completed"])
@@ -36,6 +36,8 @@ export const userAuditLogs = pgTable("user_audit_logs", {
 	description: text("description"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
+	metadata: jsonb("metadata"),
+	changes: jsonb("changes"),
 })
 
 export const userAuditLogsRelations = relations(userAuditLogs, ({ one }) => ({
