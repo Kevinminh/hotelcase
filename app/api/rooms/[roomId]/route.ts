@@ -45,3 +45,35 @@ export async function GET(request: Request, { params }: { params: { roomId: stri
 		})
 	}
 }
+
+const ENCRYPTION_KEY = process.env.API_KEY_SECRET as string
+if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
+	throw new Error("API_KEY_SECRET must be exactly 32 characters long")
+}
+
+export async function POST(request: Request, { params }: { params: { roomId: string } }) {
+	try {
+		const { roomId } = params
+
+		// const body = await request.json()
+		// const { apiKey } = body
+
+		// const decryptedKey = verifyApiKey(apiKey, ENCRYPTION_KEY)
+
+		// if (!decryptedKey) {
+		// 	return new NextResponse(JSON.stringify({ error: "Invalid API key" }), { status: 401 })
+		// }
+
+		const room = await db.query.rooms.findFirst({
+			where: eq(rooms.id, roomId),
+		})
+
+		if (!room) {
+			return new NextResponse(JSON.stringify({ error: "Room not found" }), { status: 404 })
+		}
+
+		return new NextResponse(JSON.stringify(room), { status: 200 })
+	} catch (error: any) {
+		return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 })
+	}
+}

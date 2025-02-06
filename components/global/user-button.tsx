@@ -29,16 +29,27 @@ export async function UserButton() {
 
 	return (
 		<>
-			<Link href="/manage-rooms" className={cn(buttonVariants({ variant: "link" }))}>
-				<span>Manage rooms</span>
-			</Link>
-			<ActionTooltip label={`Role: ${userRole?.role?.name ?? "user"}`}>
-				<Link href="/bookings" className={cn(buttonVariants({ variant: "link", className: "gap-x-4" }))}>
-					<span>Bookings</span>
-					<UserAvatar user={user} />
+			<li>
+				<Link href="/developer" className={cn(buttonVariants({ variant: "link" }))}>
+					<span>Developer</span>
 				</Link>
-			</ActionTooltip>
-			<SignOutButton />
+			</li>
+			<li>
+				<Link href="/manage-rooms" className={cn(buttonVariants({ variant: "link" }))}>
+					<span>Manage rooms</span>
+				</Link>
+			</li>
+			<li>
+				<ActionTooltip label={`Role: ${userRole?.role?.name ?? "user"}`}>
+					<Link href="/bookings" className={cn(buttonVariants({ variant: "link", className: "gap-x-4" }))}>
+						<span>Bookings</span>
+						<UserAvatar user={user} />
+					</Link>
+				</ActionTooltip>
+			</li>
+			<li>
+				<SignOutButton />
+			</li>
 		</>
 	)
 }

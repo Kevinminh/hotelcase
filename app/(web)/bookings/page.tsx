@@ -7,6 +7,12 @@ import { redirect } from "next/navigation"
 import React from "react"
 import { UserAuditLog } from "@/components/bookings/user-audit-log"
 import { BookingList } from "@/components/bookings/booking-list"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+	title: "Bookings",
+	description: "View all your bookings",
+}
 
 export default async function BookingsPage() {
 	const { user } = await getCurrentUser()

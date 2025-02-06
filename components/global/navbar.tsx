@@ -20,9 +20,7 @@ export default function Navbar() {
 							</Link>
 						</li>
 
-						<li>
-							<UserButton />
-						</li>
+						<UserButton />
 					</ul>
 				</nav>
 			</div>

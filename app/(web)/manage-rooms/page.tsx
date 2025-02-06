@@ -6,6 +6,12 @@ import { bookings } from "@/server/db/schemas"
 import { PERMISSIONS } from "@/server/db/seeding/roles"
 import { redirect } from "next/navigation"
 import React from "react"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+	title: "Manage Rooms",
+	description: "Manage all rooms in the hotel",
+}
 
 export default async function ManageRoomsPage() {
 	const { user } = await getCurrentUser()
